@@ -1,0 +1,4 @@
+pgdata/
+backend/__pycache__
+backend/routes/__pycache__
+.vscode/
