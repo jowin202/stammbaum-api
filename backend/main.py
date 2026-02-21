@@ -1,4 +1,6 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import date
@@ -33,3 +35,26 @@ from routes import person
 from routes import stammbaum
 app.include_router(person.router, tags=["Personen"], prefix="/api/personen")
 app.include_router(stammbaum.router, tags=["Stammbaum"], prefix="/api/stammbaum")
+
+
+
+
+app.mount("/", StaticFiles(directory="static", html=True), name="static-root")
+
+@app.middleware("http")
+async def spa_fallback(request: Request, call_next):
+
+    # Paths that should NOT fall back to index.html
+    passthrough_prefixes = (
+        "/api", "/checkout", "/docs", "/redoc", "/openapi.json"
+    )
+    if (
+        request.url.path.startswith(passthrough_prefixes)
+        or os.path.isfile(f"static{request.url.path}")
+    ):
+        return await call_next(request)
+
+    # For anything else, serve index.html
+    with open("static/index.html") as f:
+        html_content = f.read()
+    return HTMLResponse(content=html_content)
