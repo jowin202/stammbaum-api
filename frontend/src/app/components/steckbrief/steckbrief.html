@@ -9,6 +9,13 @@
     </mat-autocomplete>
   </mat-form-field>
 
+
+    <button mat-fab extended color="primary" (click)="createNewPerson()" style="margin-top: 4px;">
+      <mat-icon>person_add</mat-icon>
+      Neu
+    </button>
+    
+
   @if (steckbriefData(); as data) {
   <div style="display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 15px;">
     <button mat-flat-button color="primary" (click)="openStammbaum(data.person.id)">

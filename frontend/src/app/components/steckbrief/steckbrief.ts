@@ -18,6 +18,7 @@ import { debounceTime, distinctUntilChanged, switchMap, filter } from 'rxjs';
 
 // Eigene Dialog-Komponente
 import { EditFieldDialog } from '../edit-field-dialog/edit-field-dialog.component';
+import { NewPersonDialog } from '../new-person-dialog/new-person-dialog.component';
 
 @Component({
   selector: 'app-steckbrief',
@@ -148,5 +149,26 @@ export class PersonSteckbriefComponent implements OnInit {
     const url = `/api/stammbaum/${id}/pdf/?gen=3`;
     window.open(url, '_blank');
   }
+
+
+  createNewPerson() {
+  const dialogRef = this.dialog.open(NewPersonDialog, {
+    width: '400px'
+  });
+
+  dialogRef.afterClosed().subscribe(result => {
+    if (result) {
+      // Result enthält nun { vorname, nachname, geschlecht }
+      this.http.post<any>('/api/personen/', result).subscribe({
+        next: (newPerson) => {
+          this.snackBar.open(`${newPerson.vorname} wurde angelegt`, 'OK', { duration: 3000 });
+          this.loadSteckbrief(newPerson.id);
+        },
+        error: () => this.snackBar.open('Fehler beim Erstellen', 'OK')
+      });
+    }
+  });
+}
+
 
 }

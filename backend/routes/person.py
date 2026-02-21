@@ -132,15 +132,20 @@ async def get_person(person_id: int):
 async def create_person(data: PersonCreate):
     conn = await get_pg_connection()
     try:
+        # Wir fügen die Basidaten ein. 
+        # Falls Felder im Schema optional sind, werden sie als NULL gespeichert.
         row = await conn.fetchrow('''
             INSERT INTO personen (vorname, nachname, geburtsdatum, geschlecht, vater_id, mutter_id)
-            VALUES ($1, $2, $3, $4, $5, $6) RETURNING *
+            VALUES ($1, $2, $3, $4, $5, $6) 
+            RETURNING id, vorname, nachname, geburtsdatum, geschlecht, vater_id, mutter_id
         ''', data.vorname, data.nachname, data.geburtsdatum, data.geschlecht, data.vater_id, data.mutter_id)
+        
         return dict(row)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=f"Datenbankfehler: {str(e)}")
     finally:
         await release_pg_connection(conn)
+
 
 @router.put("/{person_id}/", response_model=PersonOut)
 async def update_person(person_id: int, data: PersonUpdate):
@@ -201,3 +206,5 @@ async def get_stammbaum_recursive(person_id: int, tiefe: int = 3):
         return result
     finally:
         await release_pg_connection(conn)
+
+        
