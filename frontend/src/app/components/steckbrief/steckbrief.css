@@ -1,0 +1,168 @@
+.steckbrief-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.steckbrief-grid {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 20px;
+}
+
+@media (max-width: 900px) {
+    .steckbrief-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.section-card {
+    margin-bottom: 20px;
+}
+
+/* Attribut Listen (analog Hund) */
+.attribute-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.attribute-row .label {
+    font-weight: 500;
+    color: #666;
+    width: 120px;
+}
+
+.attribute-row .value {
+    flex-grow: 1;
+    font-weight: 400;
+}
+
+/* Eltern Sektion */
+.parent-links-container {
+    display: flex;
+    gap: 20px;
+}
+
+.parent-box {
+    flex: 1;
+    padding: 15px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid #e0e0e0;
+    transition: background 0.2s;
+}
+
+.parent-box.clickable {
+    cursor: pointer;
+}
+
+.parent-box.clickable:hover {
+    background: #e3f2fd;
+    border-color: #2196f3;
+}
+
+.parent-box .role {
+    font-size: 0.8rem;
+    color: #888;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.parent-box .name {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+/* Statistik Tabelle */
+.stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.stats-table th {
+    text-align: left;
+    background: #f9f9f9;
+    padding: 10px;
+    border-bottom: 2px solid #ddd;
+}
+
+.stats-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.clickable-cell {
+    cursor: pointer;
+    position: relative;
+    transition: background 0.2s;
+}
+
+.clickable-cell:hover {
+    background-color: #e8eaf6;
+}
+
+.tiny-edit {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    color: #999;
+    float: right;
+    opacity: 0.5;
+}
+
+.highlight-row {
+    background-color: #fff8e1; /* Leichtes Gelb für die Hauptzeile */
+    font-weight: bold;
+}
+
+/* Sidebar Nachkommen */
+.badge {
+    margin-left: auto;
+    background: #3f51b5;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+.nachkommen-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.welpe-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    border-radius: 4px;
+    background: #fff;
+    border: 1px solid #eee;
+}
+
+.welpe-item.clickable:hover {
+    background: #f0f0f0;
+    cursor: pointer;
+}
+
+.male { color: #1976d2; }
+.female { color: #d81b60; }
+
+.welpe-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-card {
+    margin-bottom: 20px;
+}

@@ -1,0 +1,161 @@
+<div class="steckbrief-container">
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Person suchen...</mat-label>
+    <input type="text" matInput [formControl]="searchControl" [matAutocomplete]="auto">
+    <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="onPersonSelected($event)">
+      @for (p of foundPersons(); track p.id) {
+      <mat-option [value]="p">{{ p.vorname }} {{ p.nachname }}</mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+
+  @if (steckbriefData(); as data) {
+  <div style="display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 15px;">
+    <button mat-flat-button color="primary" (click)="openStammbaum(data.person.id)">
+      <mat-icon>account_tree</mat-icon> Stammbaum anzeigen
+    </button>
+
+    <button mat-stroked-button color="warn" (click)="deletePerson()">
+      <mat-icon>delete</mat-icon> Person löschen
+    </button>
+  </div>
+
+  <div class="steckbrief-grid">
+    <div class="main-info">
+      <mat-card class="section-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>person</mat-icon>
+          <mat-card-title>Stammdaten</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="attribute-row">
+            <span class="label">Vorname:</span>
+            <span class="value">{{ data.person.vorname }}</span>
+            <button mat-icon-button (click)="openEdit('vorname', data.person.vorname, 'Vorname')">
+              <mat-icon class="tiny-edit">edit</mat-icon>
+            </button>
+          </div>
+          <div class="attribute-row">
+            <span class="label">Nachname:</span>
+            <span class="value">{{ data.person.nachname }}</span>
+            <button mat-icon-button (click)="openEdit('nachname', data.person.nachname, 'Nachname')">
+              <mat-icon class="tiny-edit">edit</mat-icon>
+            </button>
+          </div>
+          <div class="attribute-row">
+            <span class="label">Geburtsdatum:</span>
+            <span class="value">{{ data.person.geburtsdatum | date:'dd.MM.yyyy' }}</span>
+            <button mat-icon-button (click)="openEdit('geburtsdatum', data.person.geburtsdatum, 'Geburtsdatum')">
+              <mat-icon class="tiny-edit">edit</mat-icon>
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="section-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>group</mat-icon>
+          <mat-card-title>Geschwister</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          @for (g of data.geschwister; track g.id) {
+          <div class="attribute-row clickable" (click)="navigateToPerson(g.id)">
+            <span>{{ g.vorname }} {{ g.nachname }}</span>
+            <mat-icon>chevron_right</mat-icon>
+          </div>
+          } @empty {
+          <p class="text-muted">Keine Geschwister gefunden.</p>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="sidebar">
+      <mat-card class="sidebar-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>family_restroom</mat-icon>
+          <mat-card-title>Eltern</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+
+          <div class="parent-box" [class.editing]="isEditingFather()">
+            <div class="parent-header">
+              <strong>Vater</strong>
+              <div class="action-buttons">
+                @if (data.eltern.vater) {
+                <button mat-icon-button color="warn"
+                  (click)="removeParent('vater_id')"><mat-icon>link_off</mat-icon></button>
+                }
+                <button mat-icon-button (click)="toggleEditFather()" [color]="isEditingFather() ? 'accent' : 'primary'">
+                  <mat-icon>{{ isEditingFather() ? 'close' : 'person_add' }}</mat-icon>
+                </button>
+              </div>
+            </div>
+            @if (isEditingFather()) {
+            <mat-form-field appearance="outline" class="full-width dense-form">
+              <input matInput [formControl]="parentSearchCtrl" [matAutocomplete]="autoV" placeholder="Suchen...">
+              <mat-autocomplete #autoV="matAutocomplete" (optionSelected)="setParent('vater_id', $event.option.value)">
+                @for (p of foundParents(); track p.id) {
+                <mat-option [value]="p">{{ p.vorname }} {{ p.nachname }}</mat-option>
+                }
+              </mat-autocomplete>
+            </mat-form-field>
+            } @else {
+            <div class="value-display" [class.link]="data.eltern.vater"
+              (click)="data.eltern.vater && navigateToPerson(data.eltern.vater.id)">
+              {{ data.eltern.vater ? (data.eltern.vater.vorname + ' ' + data.eltern.vater.nachname) : 'Unbekannt' }}
+            </div>
+            }
+          </div>
+
+          <div class="parent-box" [class.editing]="isEditingMother()" style="margin-top: 15px;">
+            <div class="parent-header">
+              <strong>Mutter</strong>
+              <div class="action-buttons">
+                @if (data.eltern.mutter) {
+                <button mat-icon-button color="warn"
+                  (click)="removeParent('mutter_id')"><mat-icon>link_off</mat-icon></button>
+                }
+                <button mat-icon-button (click)="toggleEditMother()" [color]="isEditingMother() ? 'accent' : 'primary'">
+                  <mat-icon>{{ isEditingMother() ? 'close' : 'person_add' }}</mat-icon>
+                </button>
+              </div>
+            </div>
+            @if (isEditingMother()) {
+            <mat-form-field appearance="outline" class="full-width dense-form">
+              <input matInput [formControl]="parentSearchCtrl" [matAutocomplete]="autoM" placeholder="Suchen...">
+              <mat-autocomplete #autoM="matAutocomplete" (optionSelected)="setParent('mutter_id', $event.option.value)">
+                @for (p of foundParents(); track p.id) {
+                <mat-option [value]="p">{{ p.vorname }} {{ p.nachname }}</mat-option>
+                }
+              </mat-autocomplete>
+            </mat-form-field>
+            } @else {
+            <div class="value-display" [class.link]="data.eltern.mutter"
+              (click)="data.eltern.mutter && navigateToPerson(data.eltern.mutter.id)">
+              {{ data.eltern.mutter ? (data.eltern.mutter.vorname + ' ' + data.eltern.mutter.nachname) : 'Unbekannt' }}
+            </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="sidebar-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>child_care</mat-icon>
+          <mat-card-title>Kinder</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          @for (k of data.kinder; track k.id) {
+          <div class="attribute-row clickable" (click)="navigateToPerson(k.id)">
+            <span>{{ k.vorname }}</span>
+            <small class="text-muted">(*{{ k.geburtsdatum | date:'yyyy' }})</small>
+            <mat-icon>chevron_right</mat-icon>
+          </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+  }
+</div>

@@ -30,4 +30,6 @@ app = FastAPI(title="Personen-Stammbaum API", lifespan=lifespan)
 
 
 from routes import person
+from routes import stammbaum
 app.include_router(person.router, tags=["Personen"], prefix="/api/personen")
+app.include_router(stammbaum.router, tags=["Stammbaum"], prefix="/api/stammbaum")

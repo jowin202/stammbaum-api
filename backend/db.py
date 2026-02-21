@@ -47,7 +47,7 @@ async def pg_db_init():
     conn = await get_pg_connection() 
     try:
 
-        await conn.execute('''DROP TABLE IF EXISTS personen ''')
+        #await conn.execute('''DROP TABLE IF EXISTS personen ''')
         await conn.execute('''
             CREATE TABLE IF NOT EXISTS personen (
                 id SERIAL PRIMARY KEY,

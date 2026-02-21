@@ -45,6 +45,69 @@ class PersonOut(PersonBase):
 
 # --- CRUD Endpunkte ---
 
+
+
+@router.get("/search/", response_model=List[PersonOut])
+async def search_personen(q: str):
+    conn = await get_pg_connection()
+    try:
+        # Suche in Vorname oder Nachname (case-insensitive)
+        rows = await conn.fetch('''
+            SELECT * FROM personen 
+            WHERE vorname ILIKE $1 OR nachname ILIKE $1 
+            ORDER BY nachname, vorname
+            LIMIT 15
+        ''', f'%{q}%')
+        return [dict(r) for r in rows]
+    finally:
+        await release_pg_connection(conn)
+
+# 2. STECKBRIEF (Umfassende Daten für die UI)
+@router.get("/{person_id}/steckbrief/")
+async def get_person_steckbrief(person_id: int):
+    conn = await get_pg_connection()
+    try:
+        # Grunddaten
+        person_row = await conn.fetchrow('SELECT * FROM personen WHERE id = $1', person_id)
+        if not person_row:
+            raise HTTPException(status_code=404, detail="Person nicht gefunden")
+        
+        p = dict(person_row)
+        
+        # Eltern laden
+        vater = await conn.fetchrow('SELECT id, vorname, nachname FROM personen WHERE id = $1', p['vater_id']) if p['vater_id'] else None
+        mutter = await conn.fetchrow('SELECT id, vorname, nachname FROM personen WHERE id = $1', p['mutter_id']) if p['mutter_id'] else None
+        
+        # Geschwister laden
+        # Logik: Gleiche Eltern, aber nicht die Person selbst
+        geschwister = await conn.fetch('''
+            SELECT id, vorname, nachname, geburtsdatum FROM personen 
+            WHERE (vater_id = $1 OR mutter_id = $2) 
+            AND id != $3
+            ORDER BY geburtsdatum ASC
+        ''', p['vater_id'], p['mutter_id'], person_id)
+
+        # Kinder laden
+        kinder = await conn.fetch('''
+            SELECT id, vorname, nachname, geburtsdatum FROM personen 
+            WHERE vater_id = $1 OR mutter_id = $1
+            ORDER BY geburtsdatum ASC
+        ''', person_id)
+
+        return {
+            "person": p,
+            "eltern": {
+                "vater": dict(vater) if vater else None, 
+                "mutter": dict(mutter) if mutter else None
+            },
+            "geschwister": [dict(r) for r in geschwister],
+            "kinder": [dict(r) for r in kinder]
+        }
+    finally:
+        await release_pg_connection(conn)
+
+
+    
 @router.get("/", response_model=List[PersonOut])
 async def get_all_personen():
     conn = await get_pg_connection()
