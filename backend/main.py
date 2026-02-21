@@ -9,6 +9,7 @@ from contextlib import asynccontextmanager
 import db
 from db import initialize_connection_pool, pg_db_init
 import asyncio
+import os
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
